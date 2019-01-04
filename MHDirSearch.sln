@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MHDirSearch", "MHDirSearch\MHDirSearch.csproj", "{DD7D43A1-8375-4A18-BFBB-DAEE5CDDD087}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MHDirSearch", "MHDirSearch\MHDirSearch.csproj", "{DD7D43A1-8375-4A18-BFBB-DAEE5CDDD087}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MHDirSearch.Tests", "MHDirSearch.Tests\MHDirSearch.Tests.csproj", "{22B0324B-8BBF-4087-8211-3E1AA1683B55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MHDirSearch.Tests", "MHDirSearch.Tests\MHDirSearch.Tests.csproj", "{22B0324B-8BBF-4087-8211-3E1AA1683B55}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DA673E80-8F82-47F7-9C81-458DEB0BF6DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
