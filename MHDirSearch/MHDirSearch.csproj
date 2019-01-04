@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <RootNamespace>OCSS.Util.DirSearch</RootNamespace>
+    <PackageId>OCSS.Util.DirSearch</PackageId>
+    <Authors>MH</Authors>
+    <Company>OC Software Solutions</Company>
+    <Product>DirSearch</Product>
+    <Description>Directory Search with options for specific file attribute combinations. Also supports subdirectory searches.</Description>
+    <Copyright>© 2019, OC Software Solutions</Copyright>
+    <PackageTags>OCSS Utility Directory Search</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/mzh99/MHDirSearch</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mzh99/MHDirSearch.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+</Project>
