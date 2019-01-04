@@ -52,14 +52,14 @@ namespace OCSS.Util.DirSearch {
 
       public DirSearch(): this(MASK_ALL_FILES_AND_FOLDERS, string.Empty, AttrSearchType.stAny, ALLFILEATTRIB, false) { }
 
-      public DirSearch(string SearchMask, string BaseDir): this(SearchMask, BaseDir, AttrSearchType.stAny, ALLFILEATTRIB, false) { }
+      public DirSearch(string searchMask, string baseDir): this(searchMask, baseDir, AttrSearchType.stAny, ALLFILEATTRIB, false) { }
 
-      public DirSearch(string SearchMask, string BaseDir, AttrSearchType SearchType, FileAttributes FAttr, bool ProcessSubs) {
-         this.SearchMask = SearchMask;
-         this.SearchType = SearchType;
-         FileAttribs = FAttr;
-         this.ProcessSubs = ProcessSubs;
-         this.BaseDir = BaseDir;
+      public DirSearch(string searchMask, string baseDir, AttrSearchType searchType, FileAttributes fileAttrBits, bool processSubs) {
+         this.SearchMask = searchMask;
+         this.SearchType = searchType;
+         FileAttribs = fileAttrBits;
+         this.ProcessSubs = processSubs;
+         this.BaseDir = baseDir;
          pCancelFlag = false;
       }
 
@@ -76,15 +76,15 @@ namespace OCSS.Util.DirSearch {
       }
 
       /// <summary>internal function to find files and folders</summary>
-      /// <param name="StartDir"></param>
+      /// <param name="startDir"></param>
       /// <remarks>function is recursive if pProcessSubs flag is true</remarks>
-      private void FindFiles(string StartDir) {
+      private void FindFiles(string startDir) {
          if (pCancelFlag)
             return;
-         if (!StartDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
-            StartDir = StartDir + Path.DirectorySeparatorChar.ToString();
+         if (!startDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            startDir = startDir + Path.DirectorySeparatorChar.ToString();
 
-         DirectoryInfo pDir = new DirectoryInfo(StartDir);
+         DirectoryInfo pDir = new DirectoryInfo(startDir);
 
          try {
             foreach (var OneFile in pDir.EnumerateFiles(SearchMask)) {
@@ -99,34 +99,34 @@ namespace OCSS.Util.DirSearch {
                }
             }
          }
-         catch (UnauthorizedAccessException Ex) {
-            OnFileExcept?.Invoke(Ex.Message);
+         catch (UnauthorizedAccessException e) {
+            OnFileExcept?.Invoke(e.Message);
          }
-         catch (PathTooLongException Ex) {
-            OnFileExcept?.Invoke(Ex.Message);
+         catch (PathTooLongException e) {
+            OnFileExcept?.Invoke(e.Message);
          }
          // Get all of the SubDirs
          try {
-            foreach (var OneFolder in pDir.EnumerateDirectories(MASK_ALL_FILES_AND_FOLDERS, SearchOption.TopDirectoryOnly)) {
+            foreach (var oneFolder in pDir.EnumerateDirectories(MASK_ALL_FILES_AND_FOLDERS, SearchOption.TopDirectoryOnly)) {
                // skip temp and reparse points
-               if (((OneFolder.Attributes & FileAttributes.ReparsePoint) == 0) && ((OneFolder.Attributes & FileAttributes.Temporary) == 0)) {
-                  if (!OneFolder.Name.StartsWith(".")) {
+               if (((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) && ((oneFolder.Attributes & FileAttributes.Temporary) == 0)) {
+                  if (!oneFolder.Name.StartsWith(".")) {
                      if (OnFolderMatch != null) {
-                        OnFolderMatch(OneFolder, ref pCancelFlag);
+                        OnFolderMatch(oneFolder, ref pCancelFlag);
                         if (pCancelFlag)
                            return;
                         if (ProcessSubs)
-                           FindFiles(OneFolder.FullName);      // recursive call
+                           FindFiles(oneFolder.FullName);      // recursive call
                      }
                   }
                }
             }
          }
-         catch (UnauthorizedAccessException Ex) {
-            OnFolderExcept?.Invoke(Ex.Message);
+         catch (UnauthorizedAccessException e) {
+            OnFolderExcept?.Invoke(e.Message);
          }
-         catch (PathTooLongException Ex) {
-            OnFolderExcept?.Invoke(Ex.Message);
+         catch (PathTooLongException e) {
+            OnFolderExcept?.Invoke(e.Message);
          }
       }
    }
