@@ -8,8 +8,8 @@ namespace OCSS.Util.DirSearch {
 
    /// <summary>Search files and folders using a wrapper around FileInfo, DirectoryInfo, and EnumerateFiles</summary>
    public class DirSearch {
-      public static readonly string MASK_ALL_FILES_AND_FOLDERS = "*.*";
-      public static readonly string CURRENT_FOLDER = ".";
+      public static readonly string SearchMaskAllFilesAndFolders = "*.*";
+      public static readonly string CurrentFolderInternalName = ".";
 
       // Common attribute combinations
       public static readonly FileAttributes AllAttributes = FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System | FileAttributes.Directory |
@@ -40,7 +40,7 @@ namespace OCSS.Util.DirSearch {
 
       private bool pCancelFlag;
 
-      public DirSearch(): this(MASK_ALL_FILES_AND_FOLDERS, string.Empty, AttrSearchType.AnyMatch, AllAttributes, false) { }
+      public DirSearch(): this(SearchMaskAllFilesAndFolders, string.Empty, AttrSearchType.AnyMatch, AllAttributes, false) { }
 
       public DirSearch(string searchMask, string baseDir): this(searchMask, baseDir, AttrSearchType.AnyMatch, AllAttributes, false) { }
 
@@ -54,7 +54,7 @@ namespace OCSS.Util.DirSearch {
       }
 
       public void Execute() {
-         if ((BaseDir == string.Empty) || (BaseDir == CURRENT_FOLDER)) {
+         if ((BaseDir == string.Empty) || (BaseDir == CurrentFolderInternalName)) {
             // if base directory is empty, use the current directory
             BaseDir = Directory.GetCurrentDirectory();
          }
@@ -99,10 +99,10 @@ namespace OCSS.Util.DirSearch {
          }
          // Get all of the SubDirs
          try {
-            foreach (var oneFolder in pDir.EnumerateDirectories(MASK_ALL_FILES_AND_FOLDERS, SearchOption.TopDirectoryOnly)) {
+            foreach (var oneFolder in pDir.EnumerateDirectories(SearchMaskAllFilesAndFolders, SearchOption.TopDirectoryOnly)) {
                // skip temp and reparse points
-               if (((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) && ((oneFolder.Attributes & FileAttributes.Temporary) == 0)) {
-                  if (oneFolder.Name != CURRENT_FOLDER) {
+               if ((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) {
+                  if (oneFolder.Name != CurrentFolderInternalName) {
                      if (OnFolderMatch != null) {
                         OnFolderMatch(oneFolder, ref pCancelFlag);
                         if (pCancelFlag)
