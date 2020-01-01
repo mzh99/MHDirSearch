@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace OCSS.Util.DirSearch {
@@ -26,10 +25,10 @@ namespace OCSS.Util.DirSearch {
       public AttrSearchType SearchType { get; set; }
       public FileAttributes FileAttribs { get; set; }
 
-      public delegate void FileMatch(FileInfo OneFile, ref bool CancelFlag);
+      public delegate void FileMatch(FileInfo oneFile, FileAttributes attributes, ref bool cancelFlag);
       public event FileMatch OnFileMatch;
 
-      public delegate void FolderMatch(DirectoryInfo OneFolder, ref bool CancelFlag);
+      public delegate void FolderMatch(DirectoryInfo oneFolder, FileAttributes attributes, ref bool cancelFlag);
       public event FolderMatch OnFolderMatch;
 
       public delegate void FileExcept(string ErrorMsg);
@@ -47,7 +46,7 @@ namespace OCSS.Util.DirSearch {
       public DirSearch(string searchMask, string baseDir, AttrSearchType searchType, FileAttributes fileAttrBits, bool processSubs) {
          this.SearchMask = searchMask;
          this.SearchType = searchType;
-         FileAttribs = fileAttrBits;
+         this.FileAttribs = fileAttrBits;
          this.ProcessSubs = processSubs;
          this.BaseDir = baseDir;
          pCancelFlag = false;
@@ -73,9 +72,7 @@ namespace OCSS.Util.DirSearch {
             return;
          if (startDir.EndsWith(Path.DirectorySeparatorChar.ToString()) == false)
             startDir += Path.DirectorySeparatorChar.ToString();
-
          DirectoryInfo pDir = new DirectoryInfo(startDir);
-
          try {
             foreach (var OneFile in pDir.EnumerateFiles(SearchMask)) {
                // Debug.WriteLine($"OneFile Attribs: {OneFile.Attributes}");
@@ -84,7 +81,7 @@ namespace OCSS.Util.DirSearch {
                   (((OneFile.Attributes & FileAttribs) == FileAttribs) && (SearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
                   ((OneFile.Attributes == FileAttribs) && (SearchType == AttrSearchType.ExactMatch))) {
                   if (OnFileMatch != null) {
-                     OnFileMatch(OneFile, ref pCancelFlag);
+                     OnFileMatch(OneFile, OneFile.Attributes, ref pCancelFlag);
                      if (pCancelFlag)
                         return;
                   }
@@ -100,11 +97,11 @@ namespace OCSS.Util.DirSearch {
          // Get all of the SubDirs
          try {
             foreach (var oneFolder in pDir.EnumerateDirectories(SearchMaskAllFilesAndFolders, SearchOption.TopDirectoryOnly)) {
-               // skip temp and reparse points
+               // skip reparse points
                if ((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) {
                   if (oneFolder.Name != CurrentFolderInternalName) {
                      if (OnFolderMatch != null) {
-                        OnFolderMatch(oneFolder, ref pCancelFlag);
+                        OnFolderMatch(oneFolder, oneFolder.Attributes, ref pCancelFlag);
                         if (pCancelFlag)
                            return;
                         if (ProcessSubs)
