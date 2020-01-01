@@ -1,34 +1,24 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace OCSS.Util.DirSearch {
 
-   /// <summary>Allows searching files and folders as a wrapper around FileInfo, DirectoryInfo, and EnumerateFiles</summary>
-   /// <remarks>
-   // File and Directory search
-   // Translated from my original Delphi version.
-   /// Added functionality to filter on specific file attributes and add delegates for file-matching and folder-matching.
-   ///
-   /// Notes:
-   /// ******************************
-   /// As of 2010:
-   /// Exceptions will cause the current file and/or subdirectories to be skipped.
-   /// This is not preventable according to MS unless you use Win32 or other methods.
-   /// People were hoping this would be an option in .NET 4, but MS did not address this limitation.
-   /// MS stated that it may be possible in 5+.
-   /// </remarks>
-   ///
-   public enum AttrSearchType { stExact, stAll, stAny };
+   public enum AttrSearchType { ExactMatch, AllMatchPlusAnyOthers, AnyMatch, IgnoreAttributeMatch };
 
+   /// <summary>Search files and folders using a wrapper around FileInfo, DirectoryInfo, and EnumerateFiles</summary>
    public class DirSearch {
       public static readonly string MASK_ALL_FILES_AND_FOLDERS = "*.*";
       public static readonly string CURRENT_FOLDER = ".";
 
       // Common attribute combinations
-      public static readonly FileAttributes ALLFILEATTRIB = FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System | FileAttributes.Directory | FileAttributes.Archive | FileAttributes.Normal;
-      public static readonly FileAttributes ALLFILEATTRIB_MINUS_SYS_AND_HIDDEN = FileAttributes.ReadOnly | FileAttributes.Directory | FileAttributes.Archive | FileAttributes.Normal;
-      public static readonly FileAttributes ALLFILEATTRIB_MINUS_SYS = FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.Directory | FileAttributes.Archive | FileAttributes.Normal;
-      public static readonly FileAttributes ALLFILEATTRIB_MINUS_HIDDEN = FileAttributes.ReadOnly | FileAttributes.System | FileAttributes.Directory | FileAttributes.Archive | FileAttributes.Normal;
+      public static readonly FileAttributes AllAttributes = FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System | FileAttributes.Directory |
+                                                            FileAttributes.Archive | FileAttributes.Normal | FileAttributes.SparseFile | FileAttributes.ReparsePoint |
+                                                            FileAttributes.Compressed | FileAttributes.NotContentIndexed | FileAttributes.Encrypted |
+                                                            FileAttributes.IntegrityStream | FileAttributes.NoScrubData;
+      public static readonly FileAttributes AllAttributesMinusSysAndHidden = AllAttributes & ~(FileAttributes.Hidden | FileAttributes.System);
+      public static readonly FileAttributes AllAttributesMinusSys = AllAttributes & ~FileAttributes.System;
+      public static readonly FileAttributes AllAttributesMinusHidden = AllAttributes & ~FileAttributes.Hidden;
 
       public string SearchMask { get; set; }
       public string BaseDir { get; set; }
@@ -50,9 +40,9 @@ namespace OCSS.Util.DirSearch {
 
       private bool pCancelFlag;
 
-      public DirSearch(): this(MASK_ALL_FILES_AND_FOLDERS, string.Empty, AttrSearchType.stAny, ALLFILEATTRIB, false) { }
+      public DirSearch(): this(MASK_ALL_FILES_AND_FOLDERS, string.Empty, AttrSearchType.AnyMatch, AllAttributes, false) { }
 
-      public DirSearch(string searchMask, string baseDir): this(searchMask, baseDir, AttrSearchType.stAny, ALLFILEATTRIB, false) { }
+      public DirSearch(string searchMask, string baseDir): this(searchMask, baseDir, AttrSearchType.AnyMatch, AllAttributes, false) { }
 
       public DirSearch(string searchMask, string baseDir, AttrSearchType searchType, FileAttributes fileAttrBits, bool processSubs) {
          this.SearchMask = searchMask;
@@ -81,16 +71,18 @@ namespace OCSS.Util.DirSearch {
       private void FindFiles(string startDir) {
          if (pCancelFlag)
             return;
-         if (!startDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
+         if (startDir.EndsWith(Path.DirectorySeparatorChar.ToString()) == false)
             startDir += Path.DirectorySeparatorChar.ToString();
 
          DirectoryInfo pDir = new DirectoryInfo(startDir);
 
          try {
             foreach (var OneFile in pDir.EnumerateFiles(SearchMask)) {
-               if ((((OneFile.Attributes & FileAttribs) != 0) && (SearchType == AttrSearchType.stAny)) ||
-                  (((OneFile.Attributes & FileAttribs) == FileAttribs) && (SearchType == AttrSearchType.stAll)) ||
-                  ((OneFile.Attributes == FileAttribs) && (SearchType == AttrSearchType.stExact))) {
+               // Debug.WriteLine($"OneFile Attribs: {OneFile.Attributes}");
+               if ((SearchType == AttrSearchType.IgnoreAttributeMatch) ||
+                  (((OneFile.Attributes & FileAttribs) != 0) && (SearchType == AttrSearchType.AnyMatch)) ||
+                  (((OneFile.Attributes & FileAttribs) == FileAttribs) && (SearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
+                  ((OneFile.Attributes == FileAttribs) && (SearchType == AttrSearchType.ExactMatch))) {
                   if (OnFileMatch != null) {
                      OnFileMatch(OneFile, ref pCancelFlag);
                      if (pCancelFlag)
