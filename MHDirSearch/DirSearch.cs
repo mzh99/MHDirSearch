@@ -25,10 +25,10 @@ namespace OCSS.Util.DirSearch {
       public AttrSearchType SearchType { get; set; }
       public FileAttributes FileAttribs { get; set; }
 
-      public delegate void FileMatch(FileInfo oneFile, FileAttributes attributes, ref bool cancelFlag);
+      public delegate void FileMatch(FileInfo oneFile, ref bool cancelFlag);
       public event FileMatch OnFileMatch;
 
-      public delegate void FolderMatch(DirectoryInfo oneFolder, FileAttributes attributes, ref bool cancelFlag);
+      public delegate void FolderMatch(DirectoryInfo oneFolder, ref bool cancelFlag);
       public event FolderMatch OnFolderMatch;
 
       public delegate void FileExcept(string ErrorMsg);
@@ -81,7 +81,7 @@ namespace OCSS.Util.DirSearch {
                   (((OneFile.Attributes & FileAttribs) == FileAttribs) && (SearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
                   ((OneFile.Attributes == FileAttribs) && (SearchType == AttrSearchType.ExactMatch))) {
                   if (OnFileMatch != null) {
-                     OnFileMatch(OneFile, OneFile.Attributes, ref pCancelFlag);
+                     OnFileMatch(OneFile, ref pCancelFlag);
                      if (pCancelFlag)
                         return;
                   }
@@ -101,7 +101,7 @@ namespace OCSS.Util.DirSearch {
                if ((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) {
                   if (oneFolder.Name != CurrentFolderInternalName) {
                      if (OnFolderMatch != null) {
-                        OnFolderMatch(oneFolder, oneFolder.Attributes, ref pCancelFlag);
+                        OnFolderMatch(oneFolder, ref pCancelFlag);
                         if (pCancelFlag)
                            return;
                         if (ProcessSubs)
