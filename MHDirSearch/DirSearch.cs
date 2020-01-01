@@ -82,7 +82,7 @@ namespace OCSS.Util.DirSearch {
          if (pCancelFlag)
             return;
          if (!startDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
-            startDir = startDir + Path.DirectorySeparatorChar.ToString();
+            startDir += Path.DirectorySeparatorChar.ToString();
 
          DirectoryInfo pDir = new DirectoryInfo(startDir);
 
@@ -110,7 +110,7 @@ namespace OCSS.Util.DirSearch {
             foreach (var oneFolder in pDir.EnumerateDirectories(MASK_ALL_FILES_AND_FOLDERS, SearchOption.TopDirectoryOnly)) {
                // skip temp and reparse points
                if (((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) && ((oneFolder.Attributes & FileAttributes.Temporary) == 0)) {
-                  if (!oneFolder.Name.StartsWith(".")) {
+                  if (oneFolder.Name != CURRENT_FOLDER) {
                      if (OnFolderMatch != null) {
                         OnFolderMatch(oneFolder, ref pCancelFlag);
                         if (pCancelFlag)
