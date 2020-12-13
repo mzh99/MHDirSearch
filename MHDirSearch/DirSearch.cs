@@ -37,7 +37,16 @@ namespace OCSS.Util.DirSearch {
       public delegate void FolderExcept(string ErrorMsg);
       public event FolderExcept OnFolderExcept;
 
-      private bool pCancelFlag;
+      public delegate void CustomFolderFilter(DirectoryInfo oneFolder, ref bool skip, ref bool skipChildFolders);
+      public event CustomFolderFilter OnFolderFilter;
+
+      public delegate void CustomFileFilter(FileInfo oneFile, ref bool skip);
+      public event CustomFileFilter OnFileFilter;
+
+      private bool cancelFlag;
+      private bool skipFileFlag;
+      private bool skipFolderFlag;
+      private bool skipChildFolders;
 
       public DirSearch(): this(SearchMaskAllFilesAndFolders, string.Empty, AttrSearchType.AnyMatch, AllAttributes, false) { }
 
@@ -48,16 +57,14 @@ namespace OCSS.Util.DirSearch {
          this.SearchType = searchType;
          this.FileAttribs = fileAttrBits;
          this.ProcessSubs = processSubs;
-         this.BaseDir = baseDir;
-         pCancelFlag = false;
+         this.BaseDir = string.IsNullOrEmpty(baseDir) ? Directory.GetCurrentDirectory() : baseDir;
+         cancelFlag = false;
       }
 
       public void Execute() {
-         if ((BaseDir == string.Empty) || (BaseDir == CurrentFolderInternalName)) {
-            // if base directory is empty, use the current directory
+         if (string.IsNullOrEmpty(BaseDir))
             BaseDir = Directory.GetCurrentDirectory();
-         }
-         pCancelFlag = false;
+         cancelFlag = false;
          FindFiles(BaseDir);
          // recommended to remove open handles on enumerated directories or files (MSDN)
          GC.Collect();
@@ -68,54 +75,67 @@ namespace OCSS.Util.DirSearch {
       /// <param name="startDir"></param>
       /// <remarks>function is recursive if pProcessSubs flag is true</remarks>
       private void FindFiles(string startDir) {
-         if (pCancelFlag)
+         if (cancelFlag)
             return;
          if (startDir.EndsWith(Path.DirectorySeparatorChar.ToString()) == false)
             startDir += Path.DirectorySeparatorChar.ToString();
-         DirectoryInfo pDir = new DirectoryInfo(startDir);
-         try {
-            foreach (var OneFile in pDir.EnumerateFiles(SearchMask)) {
-               // Debug.WriteLine($"OneFile Attribs: {OneFile.Attributes}");
-               if ((SearchType == AttrSearchType.IgnoreAttributeMatch) ||
-                  (((OneFile.Attributes & FileAttribs) != 0) && (SearchType == AttrSearchType.AnyMatch)) ||
-                  (((OneFile.Attributes & FileAttribs) == FileAttribs) && (SearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
-                  ((OneFile.Attributes == FileAttribs) && (SearchType == AttrSearchType.ExactMatch))) {
-                  if (OnFileMatch != null) {
-                     OnFileMatch(OneFile, ref pCancelFlag);
-                     if (pCancelFlag)
-                        return;
-                  }
+         DirectoryInfo dirInfo = new DirectoryInfo(startDir);
+         // default to no skip so if no Event, if doesn't skip file(s) and folder(s)
+         skipFolderFlag = false;
+         skipChildFolders = false;
+         OnFolderFilter?.Invoke(dirInfo, ref skipFolderFlag, ref skipChildFolders);
+         if (skipFolderFlag == false) {
+            // send message to subscribers for folder processing (excluding reparse points)
+            if ((dirInfo.Attributes & FileAttributes.ReparsePoint) == 0) {
+               if (OnFolderMatch != null) {
+                  OnFolderMatch(dirInfo, ref cancelFlag);
+                  if (cancelFlag)
+                     return;
                }
             }
-         }
-         catch (UnauthorizedAccessException e) {
-            OnFileExcept?.Invoke(e.Message);
-         }
-         catch (PathTooLongException e) {
-            OnFileExcept?.Invoke(e.Message);
-         }
-         // Get all of the SubDirs
-         try {
-            foreach (var oneFolder in pDir.EnumerateDirectories(SearchMaskAllFilesAndFolders, SearchOption.TopDirectoryOnly)) {
-               // skip reparse points
-               if ((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) {
-                  if (oneFolder.Name != CurrentFolderInternalName) {
-                     if (OnFolderMatch != null) {
-                        OnFolderMatch(oneFolder, ref pCancelFlag);
-                        if (pCancelFlag)
+            try {
+               // Process all file entries
+               foreach (var oneFile in dirInfo.EnumerateFiles(SearchMask)) {
+                  // Debug.WriteLine($"OneFile Attribs: {OneFile.Attributes}");
+                  if ((SearchType == AttrSearchType.IgnoreAttributeMatch) ||
+                     (((oneFile.Attributes & FileAttribs) != 0) && (SearchType == AttrSearchType.AnyMatch)) ||
+                     (((oneFile.Attributes & FileAttribs) == FileAttribs) && (SearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
+                     ((oneFile.Attributes == FileAttribs) && (SearchType == AttrSearchType.ExactMatch))) {
+                     // default to no skip so if no Event, it doesn't skip file
+                     skipFileFlag = false;
+                     OnFileFilter?.Invoke(oneFile, ref skipFileFlag);
+                     if (skipFileFlag == false && OnFileMatch != null) {
+                        OnFileMatch(oneFile, ref cancelFlag);
+                        if (cancelFlag)
                            return;
-                        if (ProcessSubs)
-                           FindFiles(oneFolder.FullName);      // recursive call
                      }
                   }
                }
             }
+            catch (UnauthorizedAccessException e) {
+               OnFileExcept?.Invoke(e.Message);
+            }
+            catch (PathTooLongException e) {
+               OnFileExcept?.Invoke(e.Message);
+            }
          }
-         catch (UnauthorizedAccessException e) {
-            OnFolderExcept?.Invoke(e.Message);
-         }
-         catch (PathTooLongException e) {
-            OnFolderExcept?.Invoke(e.Message);
+         // Recursively process all subfolder entries if ProcessSubs is true
+         // Get all of the subfolders if custom folder filtering allowed it (or no custom filtering performed)
+         if (skipChildFolders == false && ProcessSubs) {
+            try {
+               foreach (var oneFolder in dirInfo.EnumerateDirectories(SearchMaskAllFilesAndFolders, SearchOption.TopDirectoryOnly)) {
+                  // skip reparse points and current directory
+                  if (((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) && (oneFolder.Name != CurrentFolderInternalName)) {
+                     FindFiles(oneFolder.FullName);      // recursive call
+                  }
+               }
+            }
+            catch (UnauthorizedAccessException e) {
+               OnFolderExcept?.Invoke(e.Message);
+            }
+            catch (PathTooLongException e) {
+               OnFolderExcept?.Invoke(e.Message);
+            }
          }
       }
    }
