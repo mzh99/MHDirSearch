@@ -219,6 +219,19 @@ namespace MHDirSearch.Tests {
       }
 
       [TestMethod]
+      public void CustomFileFilterZeroByteFileslReturnsFiles() {
+         int numFolders = 0;
+         int numFiles = 0;
+         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
+         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Length != 0; };
+         searcher.Execute();
+         Assert.IsTrue(numFiles >= 4, "Number of files not >= 4");
+         Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
+      }
+
+      [TestMethod]
       public void CustomFolderFilterOnHiddenFolderReturnsOneHit() {
          int numFolders = 0;
          int numFiles = 0;
@@ -228,6 +241,19 @@ namespace MHDirSearch.Tests {
          searcher.OnFolderFilter += (DirectoryInfo folder, ref bool skip, ref bool skipChildren) => { skip = ((folder.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden);};
          searcher.Execute();
          Assert.IsTrue(numFolders >= 1, "Number of folders not >= 1");
+      }
+
+      [TestMethod]
+      public void CustomFolderFilterWithChildFoldersOnWorks() {
+         int numFolders = 0;
+         int numFiles = 0;
+         DirSearch searcher = new DirSearch("L3-L2F1*.*", RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
+         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderFilter += (DirectoryInfo folder, ref bool skip, ref bool skipChildren) => { skip = (folder.Name == "L2F1"); skipChildren = false; };
+         searcher.Execute();
+         Assert.IsTrue(numFolders >= MinFolderTotal - 1, $"Number of folders not >= {MinFolderTotal - 1}");
+         Assert.IsTrue(numFiles >= 2, "Number of files not >= 1");
       }
 
       [TestMethod]
