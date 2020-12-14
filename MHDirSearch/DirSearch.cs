@@ -77,8 +77,9 @@ namespace OCSS.Util.DirSearch {
       private void FindFiles(string startDir) {
          if (cancelFlag)
             return;
-         if (startDir.EndsWith(Path.DirectorySeparatorChar.ToString()) == false)
-            startDir += Path.DirectorySeparatorChar.ToString();
+         // make sure startDir ends with a slash
+         if (startDir[startDir.Length - 1] != Path.DirectorySeparatorChar)
+            startDir += Path.DirectorySeparatorChar;
          DirectoryInfo dirInfo = new DirectoryInfo(startDir);
          // default to no skip so if no Event, if doesn't skip file(s) and folder(s)
          skipFolderFlag = false;
