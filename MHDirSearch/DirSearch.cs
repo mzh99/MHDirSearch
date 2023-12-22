@@ -6,7 +6,7 @@ namespace OCSS.Util.DirSearch {
    public enum AttrSearchType { ExactMatch, AllMatchPlusAnyOthers, AnyMatch, IgnoreAttributeMatch };
 
    /// <summary>Search files and folders using a wrapper around FileInfo, DirectoryInfo, and EnumerateFiles</summary>
-   public class DirSearch {
+   public class DirSearch { 
       public static readonly string SearchMaskAllFilesAndFolders = "*.*";
       public static readonly string CurrentFolderInternalName = ".";
 
