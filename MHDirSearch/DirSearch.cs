@@ -6,29 +6,24 @@ namespace OCSS.Util.DirSearch {
    public enum AttrSearchType { ExactMatch, AllMatchPlusAnyOthers, AnyMatch, IgnoreAttributeMatch };
 
    /// <summary>Search files and folders using a wrapper around FileInfo, DirectoryInfo, and EnumerateFiles</summary>
-   /// <remarks>Skips reparse points on folders</remarks>
    public class DirSearch {
       public static readonly string SearchMaskAllFilesAndFolders = "*.*";
       public static readonly string CurrentFolderInternalName = ".";
 
       // Common attribute combinations
-      public static readonly FileAttributes AllAttributes = FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System | 
-                                                            FileAttributes.Directory | FileAttributes.Archive | FileAttributes.Normal | 
-                                                            FileAttributes.SparseFile | FileAttributes.Compressed | FileAttributes.NotContentIndexed | 
-                                                            FileAttributes.Encrypted | FileAttributes.IntegrityStream | FileAttributes.NoScrubData;
-      public static readonly FileAttributes SystemHidden = FileAttributes.Hidden | FileAttributes.System;
-      public static readonly FileAttributes AllAttributesMinusSysAndHidden = AllAttributes & ~SystemHidden;
+      public static readonly FileAttributes AllAttributes = FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System | FileAttributes.Directory |
+                                                            FileAttributes.Archive | FileAttributes.Normal | FileAttributes.SparseFile | FileAttributes.ReparsePoint |
+                                                            FileAttributes.Compressed | FileAttributes.NotContentIndexed | FileAttributes.Encrypted |
+                                                            FileAttributes.IntegrityStream | FileAttributes.NoScrubData;
+      public static readonly FileAttributes AllAttributesMinusSysAndHidden = AllAttributes & ~(FileAttributes.Hidden | FileAttributes.System);
       public static readonly FileAttributes AllAttributesMinusSys = AllAttributes & ~FileAttributes.System;
       public static readonly FileAttributes AllAttributesMinusHidden = AllAttributes & ~FileAttributes.Hidden;
-
-      public static readonly FileAttributes AttributesExcluded = FileAttributes.Device | FileAttributes.Offline | FileAttributes.ReparsePoint;
 
       public string SearchMask { get; set; }
       public string BaseDir { get; set; }
       public bool ProcessSubs { get; set; }
       public AttrSearchType SearchType { get; set; }
       public FileAttributes FileAttribs { get; set; }
-      public FileAttributes AlwaysExcludeAttribs { get; set; } 
 
       public delegate void FileMatch(FileInfo oneFile, ref bool cancelFlag);
       public event FileMatch OnFileMatch;
@@ -53,17 +48,14 @@ namespace OCSS.Util.DirSearch {
       private bool skipFolderFlag;
       private bool skipChildFolders;
 
-      public DirSearch(): this(SearchMaskAllFilesAndFolders, string.Empty, AttrSearchType.AnyMatch, AllAttributes, AttributesExcluded, false) { }
+      public DirSearch(): this(SearchMaskAllFilesAndFolders, string.Empty, AttrSearchType.AnyMatch, AllAttributes, false) { }
 
-      public DirSearch(string searchMask, string baseDir): this(searchMask, baseDir, AttrSearchType.AnyMatch, AllAttributes, AttributesExcluded, false) { }
+      public DirSearch(string searchMask, string baseDir): this(searchMask, baseDir, AttrSearchType.AnyMatch, AllAttributes, false) { }
 
-      public DirSearch(string searchMask, string baseDir, AttrSearchType searchType, FileAttributes fileAttrBits, bool processSubs): this(searchMask, baseDir, searchType, fileAttrBits, AttributesExcluded, processSubs) { }
-      
-      public DirSearch(string searchMask, string baseDir, AttrSearchType searchType, FileAttributes fileAttrBits, FileAttributes alwaysExcludeBits, bool processSubs) {
+      public DirSearch(string searchMask, string baseDir, AttrSearchType searchType, FileAttributes fileAttrBits, bool processSubs) {
          this.SearchMask = searchMask;
          this.SearchType = searchType;
          this.FileAttribs = fileAttrBits;
-         this.AlwaysExcludeAttribs = alwaysExcludeBits;
          this.ProcessSubs = processSubs;
          this.BaseDir = string.IsNullOrEmpty(baseDir) ? Directory.GetCurrentDirectory() : baseDir;
          cancelFlag = false;
@@ -73,8 +65,6 @@ namespace OCSS.Util.DirSearch {
          if (string.IsNullOrEmpty(BaseDir))
             BaseDir = Directory.GetCurrentDirectory();
          cancelFlag = false;
-         // make sure global excludes are added
-         AlwaysExcludeAttribs |= AttributesExcluded;
          FindFiles(BaseDir);
          // recommended to remove open handles on enumerated directories or files (MSDN)
          GC.Collect();
@@ -91,32 +81,32 @@ namespace OCSS.Util.DirSearch {
          if (startDir[startDir.Length - 1] != Path.DirectorySeparatorChar)
             startDir += Path.DirectorySeparatorChar;
          DirectoryInfo dirInfo = new DirectoryInfo(startDir);
-         // check if any of the always exlude attributes are present
-         if ((dirInfo.Attributes & AlwaysExcludeAttribs) != 0)
-            return;
          // default to no skip so if no Event, if doesn't skip file(s) and folder(s)
          skipFolderFlag = false;
          skipChildFolders = false;
          OnFolderFilter?.Invoke(dirInfo, ref skipFolderFlag, ref skipChildFolders);
          if (skipFolderFlag == false) {
-            OnFolderMatch?.Invoke(dirInfo, ref cancelFlag);
-            if (cancelFlag)
-               return;
+            // send message to subscribers for folder processing (excluding reparse points)
+            if ((dirInfo.Attributes & FileAttributes.ReparsePoint) == 0) {
+               if (OnFolderMatch != null) {
+                  OnFolderMatch(dirInfo, ref cancelFlag);
+                  if (cancelFlag)
+                     return;
+               }
+            }
             try {
                // Process all file entries
                foreach (var oneFile in dirInfo.EnumerateFiles(SearchMask)) {
-                  // check if any of the always exlude attributes are present
-                  if ((oneFile.Attributes & AlwaysExcludeAttribs) != 0)
-                     continue;
                   // Debug.WriteLine($"OneFile Attribs: {OneFile.Attributes}");
                   if ((SearchType == AttrSearchType.IgnoreAttributeMatch) ||
                      (((oneFile.Attributes & FileAttribs) != 0) && (SearchType == AttrSearchType.AnyMatch)) ||
                      (((oneFile.Attributes & FileAttribs) == FileAttribs) && (SearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
                      ((oneFile.Attributes == FileAttribs) && (SearchType == AttrSearchType.ExactMatch))) {
-                     skipFileFlag = false;   // default to no skip
+                     // default to no skip so if no Event, it doesn't skip file
+                     skipFileFlag = false;
                      OnFileFilter?.Invoke(oneFile, ref skipFileFlag);
-                     if (skipFileFlag == false) {
-                        OnFileMatch?.Invoke(oneFile, ref cancelFlag);
+                     if (skipFileFlag == false && OnFileMatch != null) {
+                        OnFileMatch(oneFile, ref cancelFlag);
                         if (cancelFlag)
                            return;
                      }
@@ -135,8 +125,8 @@ namespace OCSS.Util.DirSearch {
          if (skipChildFolders == false && ProcessSubs) {
             try {
                foreach (var oneFolder in dirInfo.EnumerateDirectories(SearchMaskAllFilesAndFolders, SearchOption.TopDirectoryOnly)) {
-                  // skip current directory
-                  if ((oneFolder.Name != CurrentFolderInternalName)) {
+                  // skip reparse points and current directory
+                  if (((oneFolder.Attributes & FileAttributes.ReparsePoint) == 0) && (oneFolder.Name != CurrentFolderInternalName)) {
                      FindFiles(oneFolder.FullName);      // recursive call
                   }
                }
