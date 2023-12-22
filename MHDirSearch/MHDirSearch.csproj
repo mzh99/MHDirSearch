@@ -17,6 +17,15 @@
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>2.4.0.0</AssemblyVersion>
     <Version>2.4</Version>
+    <Title>Directory Searcher</Title>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
 </Project>
