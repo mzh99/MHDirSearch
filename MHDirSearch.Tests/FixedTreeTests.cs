@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OCSS.Util;
 using OCSS.Util.DirSearch;
 using System.Diagnostics;
 using System.IO;
@@ -19,7 +20,8 @@ namespace MHDirSearch.Tests {
       public void AllFilesAndSubsReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -31,7 +33,8 @@ namespace MHDirSearch.Tests {
       public void TopLevelReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, false);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, false, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -43,7 +46,8 @@ namespace MHDirSearch.Tests {
       public void TopLevelWithNoHitsReturnsNoFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(NoMatchFilePatttern, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, false);
+         SearchDef searchDef = new SearchDef(RootLoc, NoMatchFilePatttern, false, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -54,7 +58,8 @@ namespace MHDirSearch.Tests {
       public void TopLevelAndSubsWithNoHitsReturnsNoFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(NoMatchFilePatttern, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, NoMatchFilePatttern, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -65,7 +70,8 @@ namespace MHDirSearch.Tests {
       public void TxtFilesAndSubsReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch("*.txt", RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, "*.txt", true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -77,7 +83,8 @@ namespace MHDirSearch.Tests {
       public void DatFilesAndSubsReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch("*.dat", RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, "*.dat", true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -89,7 +96,8 @@ namespace MHDirSearch.Tests {
       public void FilesStartingWithRootReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch("Root*.*", RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, "Root*.*", true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -101,7 +109,8 @@ namespace MHDirSearch.Tests {
       public void ROFilesAndSubsReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.AnyMatch, FileAttributes.ReadOnly, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AnyMatch, FileAttributes.ReadOnly);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -113,7 +122,8 @@ namespace MHDirSearch.Tests {
       public void SysFilesAndSubsReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.AnyMatch, FileAttributes.System, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AnyMatch, FileAttributes.System);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -125,7 +135,8 @@ namespace MHDirSearch.Tests {
       public void SysAndHiddenFilesAndSubsReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.AllMatchPlusAnyOthers, FileAttributes.Hidden | FileAttributes.System, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AllMatchPlusAnyOthers, AttributeHelper.SystemHidden);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -137,7 +148,8 @@ namespace MHDirSearch.Tests {
       public void SysOrHiddenFilesAndSubsReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.AnyMatch, FileAttributes.Hidden | FileAttributes.System, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AnyMatch, AttributeHelper.SystemHidden);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -149,7 +161,8 @@ namespace MHDirSearch.Tests {
       public void HiddenFilesAndSubsReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.AllMatchPlusAnyOthers, FileAttributes.Hidden, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AllMatchPlusAnyOthers, FileAttributes.Hidden);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
@@ -161,29 +174,32 @@ namespace MHDirSearch.Tests {
       public void EmptyPathUsesCurrentDir() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, string.Empty, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(string.Empty, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
-         Assert.AreEqual(Directory.GetCurrentDirectory(), searcher.BaseDir, "base dir != GetCurrentDirectory()");
+         Assert.AreEqual(Directory.GetCurrentDirectory(), searchDef.StartFolder, "base dir != GetCurrentDirectory()");
       }
 
       [TestMethod]
       public void NullPathUsesCurrentDir() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, null, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(null, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.Execute();
-         Assert.AreEqual(Directory.GetCurrentDirectory(), searcher.BaseDir, "base dir != GetCurrentDirectory()");
+         Assert.AreEqual(Directory.GetCurrentDirectory(), searchDef.StartFolder, "base dir != GetCurrentDirectory()");
       }
 
       [TestMethod]
       public void CustomFileFilterOnAllFilesReturnsOneHit() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Name != "Root2.dat";};
@@ -196,7 +212,8 @@ namespace MHDirSearch.Tests {
       public void CustomFileFilterOnAllFilesWithNoMatchesReturnsZero() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(NoMatchFilePatttern, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, NoMatchFilePatttern, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Name != "Root2.dat";};
@@ -209,7 +226,8 @@ namespace MHDirSearch.Tests {
       public void CustomFileFilterOnSublevelReturnsOneHit() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Name != "L2F1-1.txt";};
@@ -222,7 +240,8 @@ namespace MHDirSearch.Tests {
       public void CustomFileFilterZeroByteFileslReturnsFiles() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Length != 0; };
@@ -235,7 +254,8 @@ namespace MHDirSearch.Tests {
       public void CustomFolderFilterOnHiddenFolderReturnsOneHit() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(AllFiles, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.OnFolderFilter += (DirectoryInfo folder, ref bool skip, ref bool skipChildren) => { skip = ((folder.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden);};
@@ -247,7 +267,8 @@ namespace MHDirSearch.Tests {
       public void CustomFolderFilterWithChildFoldersOnWorks() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch("L3-L2F1*.*", RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, "L3-L2F1*.*", true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.OnFolderFilter += (DirectoryInfo folder, ref bool skip, ref bool skipChildren) => { skip = (folder.Name == "L2F1"); skipChildren = false; };
@@ -260,7 +281,8 @@ namespace MHDirSearch.Tests {
       public void CustomFileFilterOnSublevelWithNoMatchesReturnsZero() {
          int numFolders = 0;
          int numFiles = 0;
-         DirSearch searcher = new DirSearch(NoMatchFilePatttern, RootLoc, AttrSearchType.IgnoreAttributeMatch, 0, true);
+         SearchDef searchDef = new SearchDef(RootLoc, NoMatchFilePatttern, true, AttrSearchType.IgnoreAttributeMatch, 0);
+         DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
          searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Name != "L2F1-1.txt";};
