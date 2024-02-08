@@ -11,18 +11,6 @@ namespace OCSS.Util.DirSearch {
       public static readonly string SearchMaskAllFilesAndFolders = "*.*";
       public static readonly string CurrentFolderInternalName = ".";
 
-      // Common attribute combinations
-      public static readonly FileAttributes AllAttributes = FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System |
-                                                            FileAttributes.Directory | FileAttributes.Archive | FileAttributes.Normal |
-                                                            FileAttributes.SparseFile | FileAttributes.Compressed | FileAttributes.NotContentIndexed |
-                                                            FileAttributes.Encrypted | FileAttributes.IntegrityStream | FileAttributes.NoScrubData;
-      public static readonly FileAttributes SystemHidden = FileAttributes.Hidden | FileAttributes.System;
-      public static readonly FileAttributes AllAttributesMinusSysAndHidden = AllAttributes & ~SystemHidden;
-      public static readonly FileAttributes AllAttributesMinusSys = AllAttributes & ~FileAttributes.System;
-      public static readonly FileAttributes AllAttributesMinusHidden = AllAttributes & ~FileAttributes.Hidden;
-
-      public static readonly FileAttributes AttributesExcluded = FileAttributes.Device | FileAttributes.Offline | FileAttributes.ReparsePoint;
-
       public SearchDef SearchDefinition { get; set; }
 
       public delegate void FileMatch(FileInfo oneFile, ref bool cancelFlag);
@@ -60,7 +48,7 @@ namespace OCSS.Util.DirSearch {
             SearchDefinition.StartFolder = Directory.GetCurrentDirectory();
          cancelFlag = false;
          // make sure global excludes are always added
-         SearchDefinition.AlwaysExcluded |= AttributesExcluded;
+         SearchDefinition.AlwaysExcluded |= AttributeHelper.AttributesExcluded;
          FindFiles(SearchDefinition.StartFolder);
          // recommended to remove open handles on enumerated directories or files (MSDN)
          GC.Collect();

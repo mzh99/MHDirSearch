@@ -18,7 +18,7 @@ namespace OCSS.Util.DirSearch {
          ProcessSubdirs = processSubs;
          AttributeSearchType = searchType;
          Attributes = attributes;
-         AlwaysExcluded = DirSearch.AttributesExcluded;
+         AlwaysExcluded = AttributeHelper.AttributesExcluded;
       }
 
    }
