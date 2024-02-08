@@ -23,12 +23,7 @@ namespace OCSS.Util.DirSearch {
 
       public static readonly FileAttributes AttributesExcluded = FileAttributes.Device | FileAttributes.Offline | FileAttributes.ReparsePoint;
 
-      public string SearchMask { get; set; }
-      public string BaseDir { get; set; }
-      public bool ProcessSubs { get; set; }
-      public AttrSearchType SearchType { get; set; }
-      public FileAttributes FileAttribs { get; set; }
-      public FileAttributes AlwaysExcludeAttribs { get; set; }
+      public SearchDef SearchDefinition { get; set; }
 
       public delegate void FileMatch(FileInfo oneFile, ref bool cancelFlag);
       public event FileMatch OnFileMatch;
@@ -53,29 +48,20 @@ namespace OCSS.Util.DirSearch {
       private bool skipFolderFlag;
       private bool skipChildFolders;
 
-      public DirSearch() : this(SearchMaskAllFilesAndFolders, string.Empty, AttrSearchType.AnyMatch, AllAttributes, AttributesExcluded, false) { }
+      public DirSearch() : this(new SearchDef()) { }
 
-      public DirSearch(string searchMask, string baseDir) : this(searchMask, baseDir, AttrSearchType.AnyMatch, AllAttributes, AttributesExcluded, false) { }
-
-      public DirSearch(string searchMask, string baseDir, AttrSearchType searchType, FileAttributes fileAttrBits, bool processSubs) : this(searchMask, baseDir, searchType, fileAttrBits, AttributesExcluded, processSubs) { }
-
-      public DirSearch(string searchMask, string baseDir, AttrSearchType searchType, FileAttributes fileAttrBits, FileAttributes alwaysExcludeBits, bool processSubs) {
-         this.SearchMask = searchMask;
-         this.SearchType = searchType;
-         this.FileAttribs = fileAttrBits;
-         this.AlwaysExcludeAttribs = alwaysExcludeBits;
-         this.ProcessSubs = processSubs;
-         this.BaseDir = string.IsNullOrEmpty(baseDir) ? Directory.GetCurrentDirectory() : baseDir;
+      public DirSearch(SearchDef searchDef) {
+         SearchDefinition = searchDef;
          cancelFlag = false;
       }
 
       public void Execute() {
-         if (string.IsNullOrEmpty(BaseDir))
-            BaseDir = Directory.GetCurrentDirectory();
+         if (string.IsNullOrEmpty(SearchDefinition.StartFolder))
+            SearchDefinition.StartFolder = Directory.GetCurrentDirectory();
          cancelFlag = false;
-         // make sure global excludes are added
-         AlwaysExcludeAttribs |= AttributesExcluded;
-         FindFiles(BaseDir);
+         // make sure global excludes are always added
+         SearchDefinition.AlwaysExcluded |= AttributesExcluded;
+         FindFiles(SearchDefinition.StartFolder);
          // recommended to remove open handles on enumerated directories or files (MSDN)
          GC.Collect();
          GC.WaitForPendingFinalizers();
@@ -92,7 +78,7 @@ namespace OCSS.Util.DirSearch {
             startDir += Path.DirectorySeparatorChar;
          DirectoryInfo dirInfo = new DirectoryInfo(startDir);
          // check if any of the always exlude attributes are present
-         if ((dirInfo.Attributes & AlwaysExcludeAttribs) != 0)
+         if ((dirInfo.Attributes & SearchDefinition.AlwaysExcluded) != 0)
             return;
          // default to no skip so if no Event, if doesn't skip file(s) and folder(s)
          skipFolderFlag = false;
@@ -104,15 +90,15 @@ namespace OCSS.Util.DirSearch {
                return;
             try {
                // Process all file entries
-               foreach (var oneFile in dirInfo.EnumerateFiles(SearchMask)) {
+               foreach (var oneFile in dirInfo.EnumerateFiles(SearchDefinition.SearchMask)) {
                   // check if any of the always exlude attributes are present
-                  if ((oneFile.Attributes & AlwaysExcludeAttribs) != 0)
+                  if ((oneFile.Attributes & SearchDefinition.AlwaysExcluded) != 0)
                      continue;
                   // Debug.WriteLine($"OneFile Attribs: {OneFile.Attributes}");
-                  if ((SearchType == AttrSearchType.IgnoreAttributeMatch) ||
-                     (((oneFile.Attributes & FileAttribs) != 0) && (SearchType == AttrSearchType.AnyMatch)) ||
-                     (((oneFile.Attributes & FileAttribs) == FileAttribs) && (SearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
-                     ((oneFile.Attributes == FileAttribs) && (SearchType == AttrSearchType.ExactMatch))) {
+                  if ((SearchDefinition.AttributeSearchType == AttrSearchType.IgnoreAttributeMatch) ||
+                     (((oneFile.Attributes & SearchDefinition.Attributes) != 0) && (SearchDefinition.AttributeSearchType == AttrSearchType.AnyMatch)) ||
+                     (((oneFile.Attributes & SearchDefinition.Attributes) == SearchDefinition.Attributes) && (SearchDefinition.AttributeSearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
+                     ((oneFile.Attributes == SearchDefinition.Attributes) && (SearchDefinition.AttributeSearchType == AttrSearchType.ExactMatch))) {
                      skipFileFlag = false;   // default to no skip
                      OnFileFilter?.Invoke(oneFile, ref skipFileFlag);
                      if (skipFileFlag == false) {
@@ -132,7 +118,7 @@ namespace OCSS.Util.DirSearch {
          }
          // Recursively process all subfolder entries if ProcessSubs is true
          // Get all of the subfolders if custom folder filtering allowed it (or no custom filtering performed)
-         if (skipChildFolders == false && ProcessSubs) {
+         if (skipChildFolders == false && SearchDefinition.ProcessSubdirs) {
             try {
                foreach (var oneFolder in dirInfo.EnumerateDirectories(SearchMaskAllFilesAndFolders, SearchOption.TopDirectoryOnly)) {
                   // skip current directory
