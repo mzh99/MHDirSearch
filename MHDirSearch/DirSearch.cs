@@ -3,7 +3,7 @@ using System.IO;
 
 namespace OCSS.Util.DirSearch {
 
-   public enum AttrSearchType { ExactMatch, AllMatchPlusAnyOthers, AnyMatch, IgnoreAttributeMatch };
+   public enum AttrSearchType { ExactMatch = 0, AllMatchPlusAnyOthers = 1, AnyMatch = 2, IgnoreAttributeMatch = 3};
 
    /// <summary>Search files and folders using a wrapper around FileInfo, DirectoryInfo, and EnumerateFiles</summary>
    /// <remarks>Skips reparse points on folders</remarks>
