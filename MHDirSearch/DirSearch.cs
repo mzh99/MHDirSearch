@@ -24,6 +24,7 @@ namespace OCSS.Util.DirSearch {
       public Func<string, bool> OnFolderException;
       #endregion
 
+      // Note: Keep this an old style delegate as it returns two bools
       public delegate void CustomFolderFilter(DirectoryInfo oneFolder, ref bool skip, ref bool skipChildFolders);
       public event CustomFolderFilter OnFolderFilter;
 
