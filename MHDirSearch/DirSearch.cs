@@ -13,11 +13,10 @@ namespace OCSS.Util.DirSearch {
 
       public SearchDef SearchDefinition { get; set; }
 
-      public delegate void FileMatch(FileInfo oneFile, ref bool cancelFlag);
-      public event FileMatch OnFileMatch;
-
-      public delegate void FolderMatch(DirectoryInfo oneFolder, ref bool cancelFlag);
-      public event FolderMatch OnFolderMatch;
+      #region delegate properties
+      public Func<FileInfo, bool> OnFileMatch { get; set; }
+      public Func<DirectoryInfo, bool> OnFolderMatch { get; set; }
+      #endregion
 
       public delegate void FileExcept(string ErrorMsg);
       public event FileExcept OnFileExcept;
@@ -73,9 +72,11 @@ namespace OCSS.Util.DirSearch {
          skipChildFolders = false;
          OnFolderFilter?.Invoke(dirInfo, ref skipFolderFlag, ref skipChildFolders);
          if (skipFolderFlag == false) {
-            OnFolderMatch?.Invoke(dirInfo, ref cancelFlag);
-            if (cancelFlag)
-               return;
+            if (OnFolderMatch != null) {
+               cancelFlag = OnFolderMatch(dirInfo);
+               if (cancelFlag)
+                  return;
+            }
             try {
                // Process all file entries
                foreach (var oneFile in dirInfo.EnumerateFiles(SearchDefinition.SearchMask)) {
@@ -90,9 +91,11 @@ namespace OCSS.Util.DirSearch {
                      skipFileFlag = false;   // default to no skip
                      OnFileFilter?.Invoke(oneFile, ref skipFileFlag);
                      if (skipFileFlag == false) {
-                        OnFileMatch?.Invoke(oneFile, ref cancelFlag);
-                        if (cancelFlag)
-                           return;
+                        if (OnFileMatch != null) {
+                           cancelFlag = OnFileMatch(oneFile);
+                           if (cancelFlag)
+                              return;
+                        }
                      }
                   }
                }
