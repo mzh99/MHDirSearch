@@ -16,7 +16,6 @@ namespace OCSS.Util.DirSearch {
       #region File and Folder caller delegates
       public Func<FileInfo, bool> OnFileMatch { get; set; }
       public Func<FileInfo, bool> OnFileFilter { get; set; }
-
       public Func<DirectoryInfo, bool> OnFolderMatch { get; set; }
       #endregion
 
@@ -24,13 +23,6 @@ namespace OCSS.Util.DirSearch {
       public Func<string, bool> OnFileException;
       public Func<string, bool> OnFolderException;
       #endregion
-
-
-      //public delegate void FileExcept(string ErrorMsg);
-      //public event FileExcept OnFileExcept;
-
-      //public delegate void FolderExcept(string ErrorMsg);
-      //public event FolderExcept OnFolderExcept;
 
       public delegate void CustomFolderFilter(DirectoryInfo oneFolder, ref bool skip, ref bool skipChildFolders);
       public event CustomFolderFilter OnFolderFilter;
@@ -72,7 +64,7 @@ namespace OCSS.Util.DirSearch {
          // check if any of the always exlude attributes are present
          if ((dirInfo.Attributes & SearchDefinition.AlwaysExcluded) != 0)
             return;
-         // default to no skip so if no Event, if doesn't skip file(s) and folder(s)
+         // default to no skip so if no Event, it doesn't skip file(s) and folder(s)
          skipFolderFlag = false;
          skipChildFolders = false;
          OnFolderFilter?.Invoke(dirInfo, ref skipFolderFlag, ref skipChildFolders);
