@@ -15,7 +15,7 @@ namespace OCSS.Util.DirSearch {
 
       #region File and Folder caller delegates
       public Func<FileInfo, bool> OnFileMatch { get; set; }
-      public Func<FileInfo, bool> FileFilter { get; set; }
+      public Func<FileInfo, bool> OnFileFilter { get; set; }
 
       public Func<DirectoryInfo, bool> OnFolderMatch { get; set; }
       #endregion
@@ -94,8 +94,8 @@ namespace OCSS.Util.DirSearch {
                      (((oneFile.Attributes & SearchDefinition.Attributes) == SearchDefinition.Attributes) && (SearchDefinition.AttributeSearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
                      ((oneFile.Attributes == SearchDefinition.Attributes) && (SearchDefinition.AttributeSearchType == AttrSearchType.ExactMatch))) {
                      skipFileFlag = false;   // default to no skip
-                     if (FileFilter != null) {
-                        skipFileFlag = FileFilter(oneFile);
+                     if (OnFileFilter != null) {
+                        skipFileFlag = OnFileFilter(oneFile);
                      }
                      if (skipFileFlag == false) {
                         if (OnFileMatch != null) {
