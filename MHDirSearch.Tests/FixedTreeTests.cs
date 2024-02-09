@@ -22,8 +22,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 13, "Number of files not >= 13");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -35,8 +35,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, false, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 7, "Number of files not >= 7");
          Assert.IsTrue(numFolders >= 1, "Number of folders not >= 1");
@@ -48,8 +48,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, NoMatchFilePatttern, false, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.AreEqual(0, numFiles, "Number of files not 0");
       }
@@ -60,8 +60,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, NoMatchFilePatttern, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.AreEqual(0, numFiles, "Number of files not 0");
       }
@@ -72,8 +72,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, "*.txt", true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 10, "Number of files not >= 10");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -85,8 +85,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, "*.dat", true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 2, "Number of files not >= 2");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -98,8 +98,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, "Root*.*", true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 3, "Number of files not >= 3");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -111,8 +111,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AnyMatch, FileAttributes.ReadOnly);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 2, "Number of RO files not >= 2");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -124,8 +124,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AnyMatch, FileAttributes.System);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 2, "Number of Sys files not >= 2");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -137,8 +137,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AllMatchPlusAnyOthers, AttributeHelper.SystemHidden);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 1, "Number of Sys+Hidden files not >= 1");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -150,8 +150,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AnyMatch, AttributeHelper.SystemHidden);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 4, "Number of Sys|Hidden files not >= 4");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -163,8 +163,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.AllMatchPlusAnyOthers, FileAttributes.Hidden);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 3, "Number of Hidden files not >= 3");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -176,8 +176,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(string.Empty, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.AreEqual(Directory.GetCurrentDirectory(), searchDef.StartFolder, "base dir != GetCurrentDirectory()");
       }
@@ -188,8 +188,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(null, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.Execute();
          Assert.AreEqual(Directory.GetCurrentDirectory(), searchDef.StartFolder, "base dir != GetCurrentDirectory()");
       }
@@ -200,8 +200,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Name != "Root2.dat";};
          searcher.Execute();
          Assert.AreEqual(1, numFiles, "Number of files not 1");
@@ -214,8 +214,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, NoMatchFilePatttern, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Name != "Root2.dat";};
          searcher.Execute();
          Assert.AreEqual(0, numFiles, "Number of files not 0");
@@ -228,8 +228,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Name != "L2F1-1.txt";};
          searcher.Execute();
          Assert.AreEqual(1, numFiles, "Number of files not 1");
@@ -242,8 +242,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Length != 0; };
          searcher.Execute();
          Assert.IsTrue(numFiles >= 4, "Number of files not >= 4");
@@ -256,8 +256,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, AllFiles, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.OnFolderFilter += (DirectoryInfo folder, ref bool skip, ref bool skipChildren) => { skip = ((folder.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden);};
          searcher.Execute();
          Assert.IsTrue(numFolders >= 1, "Number of folders not >= 1");
@@ -269,8 +269,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, "L3-L2F1*.*", true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.OnFolderFilter += (DirectoryInfo folder, ref bool skip, ref bool skipChildren) => { skip = (folder.Name == "L2F1"); skipChildren = false; };
          searcher.Execute();
          Assert.IsTrue(numFolders >= MinFolderTotal - 1, $"Number of folders not >= {MinFolderTotal - 1}");
@@ -283,8 +283,8 @@ namespace MHDirSearch.Tests {
          int numFiles = 0;
          SearchDef searchDef = new SearchDef(RootLoc, NoMatchFilePatttern, true, AttrSearchType.IgnoreAttributeMatch, 0);
          DirSearch searcher = new DirSearch(searchDef);
-         searcher.OnFolderMatch += (DirectoryInfo info, ref bool flag) => { numFolders++; };
-         searcher.OnFileMatch += (FileInfo info, ref bool flag) => { numFiles++; };
+         searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
+         searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
          searcher.OnFileFilter += (FileInfo oneFile, ref bool skip) => { skip = oneFile.Name != "L2F1-1.txt";};
          searcher.Execute();
          Assert.AreEqual(0, numFiles, "Number of files not 0");

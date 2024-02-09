@@ -3,7 +3,7 @@ using System.IO;
 
 namespace OCSS.Util.DirSearch {
 
-   public enum AttrSearchType { ExactMatch = 0, AllMatchPlusAnyOthers = 1, AnyMatch = 2, IgnoreAttributeMatch = 3};
+   public enum AttrSearchType { ExactMatch = 0, AllMatchPlusAnyOthers = 1, AnyMatch = 2, IgnoreAttributeMatch = 3 };
 
    /// <summary>Search files and folders using a wrapper around FileInfo, DirectoryInfo, and EnumerateFiles</summary>
    /// <remarks>Skips reparse points on folders</remarks>
@@ -13,22 +13,27 @@ namespace OCSS.Util.DirSearch {
 
       public SearchDef SearchDefinition { get; set; }
 
-      #region delegate properties
+      #region File and Folder caller delegates
       public Func<FileInfo, bool> OnFileMatch { get; set; }
+      public Func<FileInfo, bool> FileFilter { get; set; }
+
       public Func<DirectoryInfo, bool> OnFolderMatch { get; set; }
       #endregion
 
-      public delegate void FileExcept(string ErrorMsg);
-      public event FileExcept OnFileExcept;
+      #region Exception caller delegates 
+      public Func<string, bool> OnFileException;
+      public Func<string, bool> OnFolderException;
+      #endregion
 
-      public delegate void FolderExcept(string ErrorMsg);
-      public event FolderExcept OnFolderExcept;
+
+      //public delegate void FileExcept(string ErrorMsg);
+      //public event FileExcept OnFileExcept;
+
+      //public delegate void FolderExcept(string ErrorMsg);
+      //public event FolderExcept OnFolderExcept;
 
       public delegate void CustomFolderFilter(DirectoryInfo oneFolder, ref bool skip, ref bool skipChildFolders);
       public event CustomFolderFilter OnFolderFilter;
-
-      public delegate void CustomFileFilter(FileInfo oneFile, ref bool skip);
-      public event CustomFileFilter OnFileFilter;
 
       private bool cancelFlag;
       private bool skipFileFlag;
@@ -89,7 +94,9 @@ namespace OCSS.Util.DirSearch {
                      (((oneFile.Attributes & SearchDefinition.Attributes) == SearchDefinition.Attributes) && (SearchDefinition.AttributeSearchType == AttrSearchType.AllMatchPlusAnyOthers)) ||
                      ((oneFile.Attributes == SearchDefinition.Attributes) && (SearchDefinition.AttributeSearchType == AttrSearchType.ExactMatch))) {
                      skipFileFlag = false;   // default to no skip
-                     OnFileFilter?.Invoke(oneFile, ref skipFileFlag);
+                     if (FileFilter != null) {
+                        skipFileFlag = FileFilter(oneFile);
+                     }
                      if (skipFileFlag == false) {
                         if (OnFileMatch != null) {
                            cancelFlag = OnFileMatch(oneFile);
@@ -101,10 +108,16 @@ namespace OCSS.Util.DirSearch {
                }
             }
             catch (UnauthorizedAccessException e) {
-               OnFileExcept?.Invoke(e.Message);
+               if (OnFileException != null) {
+                  cancelFlag = OnFileException(e.Message);
+                  if (cancelFlag)
+                     return;
+               }
             }
             catch (PathTooLongException e) {
-               OnFileExcept?.Invoke(e.Message);
+               cancelFlag = OnFileException(e.Message);
+               if (cancelFlag)
+                  return;
             }
          }
          // Recursively process all subfolder entries if ProcessSubs is true
@@ -119,10 +132,18 @@ namespace OCSS.Util.DirSearch {
                }
             }
             catch (UnauthorizedAccessException e) {
-               OnFolderExcept?.Invoke(e.Message);
+               if (OnFolderException != null) {
+                  cancelFlag = OnFolderException(e.Message);
+                  if (cancelFlag)
+                     return;
+               }
             }
             catch (PathTooLongException e) {
-               OnFolderExcept?.Invoke(e.Message);
+               if (OnFolderException != null) {
+                  cancelFlag = OnFolderException(e.Message);
+                  if (cancelFlag)
+                     return;
+               }
             }
          }
       }
