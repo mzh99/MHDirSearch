@@ -8,15 +8,25 @@
     <Company>OC Software Solutions</Company>
     <Product>DirSearch</Product>
     <Description>Directory Search with options for specific file attribute combinations. Also supports subdirectory searches.</Description>
-    <Copyright>© 2023, OC Software Solutions</Copyright>
+    <Copyright>© 2024, OC Software Solutions</Copyright>
     <PackageTags>OCSS Utility Directory Search</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/mzh99/MHDirSearch</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mzh99/MHDirSearch.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>2.4.0.0</AssemblyVersion>
-    <Version>2.4</Version>
+    <AssemblyVersion>2.5.0.0</AssemblyVersion>
+    <Version>2.5</Version>
+    <Title>Directory Search</Title>
+    <ErrorReport>none</ErrorReport>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
 </Project>

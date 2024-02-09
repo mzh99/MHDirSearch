@@ -1,14 +1,12 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OCSS.Util;
 using OCSS.Util.DirSearch;
 using System.Diagnostics;
 using System.IO;
 
-namespace MHDirSearch.Tests {
-
+namespace DSTests {
    [TestClass]
    public class FixedTreeTests {
-
       // todo: extract root.7z to a test location for testing this and update this variable to point to that location before running this integration test suite
       private static readonly string RootLoc = @"E:\Data\DL\Root";
       private static readonly string AllFiles = "*.*";
@@ -202,7 +200,7 @@ namespace MHDirSearch.Tests {
          DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
          searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
-         searcher.OnFileFilter += (FileInfo oneFile) => { return oneFile.Name != "Root2.dat";};
+         searcher.OnFileFilter += (FileInfo oneFile) => { return oneFile.Name != "Root2.dat"; };
          searcher.Execute();
          Assert.AreEqual(1, numFiles, "Number of files not 1");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -216,7 +214,7 @@ namespace MHDirSearch.Tests {
          DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
          searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
-         searcher.OnFileFilter += (FileInfo oneFile) => { return oneFile.Name != "Root2.dat";};
+         searcher.OnFileFilter += (FileInfo oneFile) => { return oneFile.Name != "Root2.dat"; };
          searcher.Execute();
          Assert.AreEqual(0, numFiles, "Number of files not 0");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -230,7 +228,7 @@ namespace MHDirSearch.Tests {
          DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
          searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
-         searcher.OnFileFilter += (FileInfo oneFile) => { return oneFile.Name != "L2F1-1.txt";};
+         searcher.OnFileFilter += (FileInfo oneFile) => { return oneFile.Name != "L2F1-1.txt"; };
          searcher.Execute();
          Assert.AreEqual(1, numFiles, "Number of files not 1");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
@@ -258,7 +256,7 @@ namespace MHDirSearch.Tests {
          DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
          searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
-         searcher.OnFolderFilter += (DirectoryInfo folder, ref bool skip, ref bool skipChildren) => { skip = ((folder.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden);};
+         searcher.OnFolderFilter += (DirectoryInfo folder, ref bool skip, ref bool skipChildren) => { skip = ((folder.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden); };
          searcher.Execute();
          Assert.IsTrue(numFolders >= 1, "Number of folders not >= 1");
       }
@@ -285,12 +283,11 @@ namespace MHDirSearch.Tests {
          DirSearch searcher = new DirSearch(searchDef);
          searcher.OnFolderMatch += (DirectoryInfo info) => { numFolders++; return false; };
          searcher.OnFileMatch += (FileInfo info) => { numFiles++; return false; };
-         searcher.OnFileFilter += (FileInfo oneFile) => { return oneFile.Name != "L2F1-1.txt";};
+         searcher.OnFileFilter += (FileInfo oneFile) => { return oneFile.Name != "L2F1-1.txt"; };
          searcher.Execute();
          Assert.AreEqual(0, numFiles, "Number of files not 0");
          Assert.IsTrue(numFolders >= MinFolderTotal, $"Number of folders not >= {MinFolderTotal}");
       }
 
    }
-
 }
